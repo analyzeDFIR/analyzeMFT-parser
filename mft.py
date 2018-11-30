@@ -75,7 +75,7 @@ class MFTEntryAttribute(ByteParser):
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
         Returns:
             Container<String, Any>
-            MFT entry index root attribute (see: src.structures.index)
+            MFT entry index root attribute (see: structures.index)
         Preconditions:
             stream is of type TextIOWrapper, BufferedReader or BytesIO  (assumed True)
         '''
@@ -123,7 +123,7 @@ class MFTEntryAttribute(ByteParser):
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
         Returns:
             Container<String, Any>
-            MFT entry volume information attribute (see: src.structures.volume_information)
+            MFT entry volume information attribute (see: structures.volume_information)
         Preconditions:
             stream is of type TextIOWrapper, BufferedReader or BytesIO  (assumed True)
         '''
@@ -134,7 +134,7 @@ class MFTEntryAttribute(ByteParser):
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
         Returns:
             String
-            MFT entry volume name attribute (see: src.structures.volume_name)
+            MFT entry volume name attribute (see: structures.volume_name)
         Preconditions:
             stream is of type TextIOWrapper, BufferedReader or BytesIO  (assumed True)
         '''
@@ -145,7 +145,7 @@ class MFTEntryAttribute(ByteParser):
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
         Returns:
             Container<String, Container<String, Any>>
-            MFT entry access control list attribute (see: src.structures.general.access_control_list)
+            MFT entry access control list attribute (see: structures.general.access_control_list)
         Preconditions:
             stream is of type TextIOWrapper, BufferedReader or BytesIO  (assumed True)
         '''
@@ -174,7 +174,7 @@ class MFTEntryAttribute(ByteParser):
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
         Returns:
             Container<String, Any>
-            MFT entry security descriptor attribute (see: src.structures.security_descriptor)
+            MFT entry security descriptor attribute (see: structures.security_descriptor)
         Preconditions:
             stream is of type TextIOWrapper, BufferedReader or BytesIO  (assumed True)
         '''
@@ -211,7 +211,7 @@ class MFTEntryAttribute(ByteParser):
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
         Returns:
             Container<String, Any>
-            MFT entry object id attribute (see: src.structures.object_id)
+            MFT entry object id attribute (see: structures.object_id)
         Preconditions:
             stream is of type TextIOWrapper, BufferedReader or BytesIO  (assumed True)
         '''
@@ -222,7 +222,7 @@ class MFTEntryAttribute(ByteParser):
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
         Returns:
             Container<String, Any>
-            MFT entry file name attribute (see: src.structures.file_name)
+            MFT entry file name attribute (see: structures.file_name)
         Preconditions:
             stream is of type TextIOWrapper, BufferedReader or BytesIO  (assumed True)
         '''
@@ -238,7 +238,7 @@ class MFTEntryAttribute(ByteParser):
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
         Returns:
             Container<String, Any>
-            MFT entry attribute list attribute (see: src.structures.attribute_list)
+            MFT entry attribute list attribute (see: structures.attribute_list)
         Preconditions:
             stream is of type TextIOWrapper, BufferedReader or BytesIO  (assumed True)
         '''
@@ -265,7 +265,7 @@ class MFTEntryAttribute(ByteParser):
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
         Returns:
             Container<String, Any>
-            MFT entry standard information attribute (see: src.structures.standard_information)
+            MFT entry standard information attribute (see: structures.standard_information)
         Preconditions:
             stream is of type TextIOWrapper, BufferedReader or BytesIO  (assumed True)
         '''
@@ -301,7 +301,7 @@ class MFTEntryAttribute(ByteParser):
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
         Returns:
             Container<String, Any>
-            MFT entry attribute header information (see: src.structures.headers)
+            MFT entry attribute header information (see: structures.headers)
         Preconditions:
             stream is of type TextIOWrapper, BufferedReader or BytesIO  (assumed True)
         '''
@@ -364,7 +364,7 @@ class MFTEntry(ByteParser):
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
         Returns:
             Container<String, Any>
-            MFT entry attribute header information (see: src.structures.headers)
+            MFT entry attribute header information (see: structures.headers)
         Preconditions:
             stream is of type TextIOWrapper, BufferedReader or BytesIO  (assumed True)
         '''
