@@ -29,11 +29,11 @@ import hashlib
 from construct.lib import Container
 
 try:
-    from lib.parsers import ByteParser, SequenceFileParser
+    from lib.parsers import ByteParser, FileParser
     from lib.parsers.utils import StructureProperty, WindowsTime
     from structures import mft as mftstructs
 except ImportError:
-    from .lib.parsers import ByteParser, SequenceFileParser
+    from .lib.parsers import ByteParser, FileParser
     from .lib.parsers.utils import StructureProperty, WindowsTime
     from .structures import mft as mftstructs
 
@@ -54,8 +54,7 @@ class MFTEntryAttribute(ByteParser):
         Args:
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
         Returns:
-            Container<String, Any>
-            MFT entry resident data attribute
+            None
         Preconditions:
             stream is of type TextIOWrapper, BufferedReader or BytesIO  (assumed True)
         '''
@@ -65,8 +64,7 @@ class MFTEntryAttribute(ByteParser):
         Args:
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
         Returns:
-            Container<String, Any>
-            MFT entry resident data attribute
+            None
         Preconditions:
             stream is of type TextIOWrapper, BufferedReader or BytesIO  (assumed True)
         '''
@@ -379,13 +377,23 @@ class MFTEntry(ByteParser):
             header.MultiSectorHeader.Signature = 'CRPT'
         return self._clean_value(header)
 
-class MFT(SequenceFileParser):
+class MFT(FileParser):
     '''
     Class for parsing Windows MFT file
     '''
-    def _parse_records(self, stream):
+    records = StructureProperty(0, 'records')
+
+    def _preamble(self): pass
+    def _postamble(self): pass
+    def _parse_records(self, stream=None):
         '''
-        @SequenceFileParser._parse_records
+        Args:
+            stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
+        Returns:
+            Gen<MFTEntry>
+            Generator of MFT entries
+        Preconditions:
+            stream is of type TextIOWrapper, BufferedReader or BytesIO  (assumed True)
         '''
         super()._preamble()
         try:
