@@ -41,15 +41,15 @@ class MFTEntryAttribute(ByteParser):
     '''
     Class for parsing Windows MFT file entry attributes
     '''
-    header = StructureProperty(1, 'header')
-    body = StructureProperty(2, 'body', deps=['header'])
+    header = StructureProperty(0, 'header')
+    body = StructureProperty(1, 'body', deps=['header'])
 
     def _postamble(self):
         '''
         @ByteParser._postamble
         '''
         pass
-    def _parse_logged_utility_stream(self, stream=None):
+    def _parse_logged_utility_stream(self):
         '''
         Args:
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
@@ -59,7 +59,7 @@ class MFTEntryAttribute(ByteParser):
             stream is of type TextIOWrapper, BufferedReader or BytesIO  (assumed True)
         '''
         return None
-    def _parse_bitmap(self, stream=None):
+    def _parse_bitmap(self):
         '''
         Args:
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
@@ -69,7 +69,7 @@ class MFTEntryAttribute(ByteParser):
             stream is of type TextIOWrapper, BufferedReader or BytesIO  (assumed True)
         '''
         return None
-    def _parse_index_root(self, stream=None):
+    def _parse_index_root(self):
         '''
         Args:
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
@@ -104,7 +104,7 @@ class MFTEntryAttribute(ByteParser):
             except:
                 break
         return self._clean_value(index_root)
-    def _parse_data(self, stream=None):
+    def _parse_data(self):
         '''
         Args:
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
@@ -117,7 +117,7 @@ class MFTEntryAttribute(ByteParser):
         data = Container(content=stream.read(self.header.RecordLength))
         data.sha2hash = hashlib.sha256(data.content).hexdigest()
         return data
-    def _parse_volume_information(self, stream=None):
+    def _parse_volume_information(self):
         '''
         Args:
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
@@ -128,7 +128,7 @@ class MFTEntryAttribute(ByteParser):
             stream is of type TextIOWrapper, BufferedReader or BytesIO  (assumed True)
         '''
         return self._clean_value(mftstructs.MFTVolumeInformation.parse_stream(stream))
-    def _parse_volume_name(self, stream=None):
+    def _parse_volume_name(self):
         '''
         Args:
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
@@ -139,7 +139,7 @@ class MFTEntryAttribute(ByteParser):
             stream is of type TextIOWrapper, BufferedReader or BytesIO  (assumed True)
         '''
         return stream.read(self.header.Form.ValueLength).decode('UTF16')
-    def _parse_access_control_list(self, stream=None):
+    def _parse_access_control_list(self):
         '''
         Args:
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
@@ -168,7 +168,7 @@ class MFTEntryAttribute(ByteParser):
             return self._clean_value(acl)
         except:
             return None
-    def _parse_security_descriptor(self, stream=None):
+    def _parse_security_descriptor(self):
         '''
         Args:
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
@@ -205,7 +205,7 @@ class MFTEntryAttribute(ByteParser):
             security_descriptor.body.SACL = None
             security_descriptor.body.DACL = None
         return self._clean_value(security_descriptor)
-    def _parse_object_id(self, stream=None):
+    def _parse_object_id(self):
         '''
         Args:
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
@@ -216,7 +216,7 @@ class MFTEntryAttribute(ByteParser):
             stream is of type TextIOWrapper, BufferedReader or BytesIO  (assumed True)
         '''
         return self._clean_value(mftstructs.MFTObjectID.parse_stream(stream))
-    def _parse_file_name(self, stream=None):
+    def _parse_file_name(self):
         '''
         Args:
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
@@ -232,7 +232,7 @@ class MFTEntryAttribute(ByteParser):
                 file_name[field.replace('Raw', '')] = WindowsTime(file_name[field]).parse()
         file_name.FileName = stream.read(file_name.FileNameLength * 2).decode('UTF16')
         return self._clean_value(file_name)
-    def _parse_attribute_list(self, stream=None):
+    def _parse_attribute_list(self):
         '''
         Args:
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
@@ -259,7 +259,7 @@ class MFTEntryAttribute(ByteParser):
                 attributes[attribute_list_entry.AttributeTypeCode.lower()].append(attribute_list_entry)
                 stream.seek(AL_original_position + attribute_list_entry.RecordLength)
         return self._clean_value(attributes)
-    def _parse_standard_information(self, stream=None):
+    def _parse_standard_information(self):
         '''
         Args:
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
@@ -274,7 +274,7 @@ class MFTEntryAttribute(ByteParser):
             if field.startswith('Raw') and field.endswith('Time'):
                 standard_information[field.replace('Raw', '')] = WindowsTime(standard_information[field]).parse()
         return self._clean_value(standard_information)
-    def _parse_body(self, stream=None):
+    def _parse_body(self):
         '''
         Args:
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
@@ -295,7 +295,7 @@ class MFTEntryAttribute(ByteParser):
             return self._clean_value(getattr(self, parser)(stream=stream))
         finally:
             stream.seek(original_position + self.header.RecordLength)
-    def _parse_header(self, stream=None):
+    def _parse_header(self):
         '''
         Args:
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
@@ -325,10 +325,10 @@ class MFTEntry(ByteParser):
     '''
     Class for parsing Windows MFT file entries
     '''
-    header = StructureProperty(1, 'header')
-    attributes = StructureProperty(2, 'attributes', deps=['header'])
+    header = StructureProperty(0, 'header')
+    attributes = StructureProperty(1, 'attributes', deps=['header'])
 
-    def _parse_attributes(self, stream=None):
+    def _parse_attributes(self):
         '''
         Args:
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
@@ -358,7 +358,7 @@ class MFTEntry(ByteParser):
                 body=attribute.body
             ))
         return self._clean_value(attributes)
-    def _parse_header(self, stream=None):
+    def _parse_header(self):
         '''
         Args:
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
@@ -368,7 +368,7 @@ class MFTEntry(ByteParser):
         Preconditions:
             stream is of type TextIOWrapper, BufferedReader or BytesIO  (assumed True)
         '''
-        header = mftstructs.MFTEntryHeader.parse_stream(stream)
+        header = mftstructs.MFTEntryHeader.parse_stream(self.stream)
         if header.MultiSectorHeader.RawSignature == 0x454c4946:
             header.MultiSectorHeader.Signature = 'FILE'
         elif header.MultiSectorHeader.RawSignature == 0x44414142:
@@ -381,11 +381,9 @@ class MFT(FileParser):
     '''
     Class for parsing Windows MFT file
     '''
-    records = StructureProperty(0, 'records')
+    records = StructureProperty(0, 'records', dynamic=True)
 
-    def _preamble(self): pass
-    def _postamble(self): pass
-    def _parse_records(self, stream=None):
+    def _parse_records(self):
         '''
         Args:
             stream: TextIOWrapper|BufferedReader|BytesIO   => the stream to parse from
@@ -395,11 +393,7 @@ class MFT(FileParser):
         Preconditions:
             stream is of type TextIOWrapper, BufferedReader or BytesIO  (assumed True)
         '''
-        super()._preamble()
-        try:
+        record = self.stream.read(1024)
+        while record != b'':
+            yield MFTEntry(record)
             record = self.stream.read(1024)
-            while record != b'':
-                yield MFTEntry(record)
-                record = self.stream.read(1024)
-        finally:
-            super()._postamble()
