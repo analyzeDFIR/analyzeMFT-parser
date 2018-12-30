@@ -80,9 +80,9 @@ class MFTEntryAttribute(ByteParser):
             N/A
         '''
         index_root = Container()
-        index_root.root_header = mftstructs.MFTIndexRootHeader.parse_stream(stream)
+        index_root.root_header = mftstructs.MFTIndexRootHeader.parse_stream(self.stream)
         node_header_position = self.stream.tell()
-        index_root.node_header = mftstructs.MFTIndexNodeHeader.parse_stream(stream)
+        index_root.node_header = mftstructs.MFTIndexNodeHeader.parse_stream(self.stream)
         index_root.entries = list()
         self.stream.seek(node_header_position + index_root.node_header.IndexValuesOffset)
         index_entry_start_position = self.stream.tell()
@@ -90,7 +90,7 @@ class MFTEntryAttribute(ByteParser):
         while (self.stream.tell() - index_entry_start_position) < index_entry_size:
             try:
                 index_entry_position = self.stream.tell()
-                index_entry = mftstructs.MFTIndexEntry.parse_stream(stream)
+                index_entry = mftstructs.MFTIndexEntry.parse_stream(self.stream)
                 seek_length = mftstructs.MFTIndexEntry.sizeof() + \
                     index_entry.IndexValueSize + \
                     index_entry.IndexKeyDataSize
@@ -127,7 +127,7 @@ class MFTEntryAttribute(ByteParser):
         Preconditions:
             N/A
         '''
-        return self._clean_value(mftstructs.MFTVolumeInformation.parse_stream(stream))
+        return self._clean_value(mftstructs.MFTVolumeInformation.parse_stream(self.stream))
     def _parse_volume_name(self):
         '''
         Args:
@@ -151,7 +151,7 @@ class MFTEntryAttribute(ByteParser):
         '''
         try:
             acl = Container()
-            acl.header = mftstructs.NTFSACLHeader.parse_stream(stream)
+            acl.header = mftstructs.NTFSACLHeader.parse_stream(self.stream)
             acl_position = self.stream.tell()
             acl_size = acl.header.AclSize - mftstructs.NTFSACLHeader.sizeof()
             acl.body = list()
@@ -159,8 +159,8 @@ class MFTEntryAttribute(ByteParser):
                 ace_position = self.stream.tell()
                 try:
                     ace = Container()
-                    ace.header = mftstructs.NTFSACEHeader.parse_stream(stream)
-                    ace.body = mftstructs.NTFSACEAcessMask.parse_stream(stream)
+                    ace.header = mftstructs.NTFSACEHeader.parse_stream(self.stream)
+                    ace.body = mftstructs.NTFSACEAcessMask.parse_stream(self.stream)
                     acl.body.append(ace)
                     self.stream.seek(ace_position + ace.header.AceSize)
                 except:
@@ -183,12 +183,12 @@ class MFTEntryAttribute(ByteParser):
             header=None,
             body=Container()
         )
-        security_descriptor.header = mftstructs.MFTSecurityDescriptorHeader.parse_stream(stream)
+        security_descriptor.header = mftstructs.MFTSecurityDescriptorHeader.parse_stream(self.stream)
         if security_descriptor.header.Control.SE_SELF_RELATIVE:
             self.stream.seek(header_position + security_descriptor.header.OwnerSIDOffset)
-            security_descriptor.body.OwnerSID = mftstructs.NTFSSID.parse_stream(stream)
+            security_descriptor.body.OwnerSID = mftstructs.NTFSSID.parse_stream(self.stream)
             self.stream.seek(header_position + security_descriptor.header.GroupSIDOffset)
-            security_descriptor.body.GroupSID = mftstructs.NTFSSID.parse_stream(stream)
+            security_descriptor.body.GroupSID = mftstructs.NTFSSID.parse_stream(self.stream)
             if security_descriptor.header.Control.SE_SACL_PRESENT:
                 self.stream.seek(header_position + security_descriptor.header.SACLOffset)
                 security_descriptor.body.SACL = self._parse_access_control_list()
@@ -215,7 +215,7 @@ class MFTEntryAttribute(ByteParser):
         Preconditions:
             N/A
         '''
-        return self._clean_value(mftstructs.MFTObjectID.parse_stream(stream))
+        return self._clean_value(mftstructs.MFTObjectID.parse_stream(self.stream))
     def _parse_file_name(self):
         '''
         Args:
@@ -226,7 +226,7 @@ class MFTEntryAttribute(ByteParser):
         Preconditions:
             N/A
         '''
-        file_name = mftstructs.MFTFileNameAttribute.parse_stream(stream)
+        file_name = mftstructs.MFTFileNameAttribute.parse_stream(self.stream)
         for field in file_name:
             if field.startswith('Raw') and field.endswith('Time'):
                 file_name[field.replace('Raw', '')] = WindowsTime(file_name[field]).parse()
@@ -246,7 +246,7 @@ class MFTEntryAttribute(ByteParser):
         while self.stream.tell() < self.header.Form.ValueLength:
             AL_original_position = self.stream.tell()
             try:
-                attribute_list_entry = mftstructs.MFTAttributeListEntry.parse_stream(stream)
+                attribute_list_entry = mftstructs.MFTAttributeListEntry.parse_stream(self.stream)
                 if attribute_list_entry.AttributeTypeCode == 'END_OF_ATTRIBUTES':
                     break
                 self.stream.seek(AL_original_position + attribute_list_entry.AttributeNameOffset)
@@ -269,7 +269,7 @@ class MFTEntryAttribute(ByteParser):
         Preconditions:
             N/A
         '''
-        standard_information = mftstructs.MFTStandardInformationAttribute.parse_stream(stream)
+        standard_information = mftstructs.MFTStandardInformationAttribute.parse_stream(self.stream)
         for field in standard_information:
             if field.startswith('Raw') and field.endswith('Time'):
                 standard_information[field.replace('Raw', '')] = WindowsTime(standard_information[field]).parse()
@@ -307,7 +307,7 @@ class MFTEntryAttribute(ByteParser):
         '''
         original_position = self.stream.tell()
         try:
-            header = mftstructs.MFTAttributeHeader.parse_stream(stream)
+            header = mftstructs.MFTAttributeHeader.parse_stream(self.stream)
             if header.NameLength > 0:
                 try:
                     self.stream.seek(original_position + header.NameOffset)
@@ -333,30 +333,25 @@ class MFTEntry(ByteParser):
         Args:
             N/A
         Returns:
-            Tuple<String, Container<String, Any>>
+            List<MFTEntryAttribute>
             Attributes in MFT entry
         Preconditions:
             N/A
         '''
-        attributes = Container()
+        attributes = list()
         self.stream.seek(self.header.FirstAttributeOffset)
         while self.stream.tell() < self.header.UsedSize:
             original_position = self.stream.tell()
-            type_code = mftstructs.MFTAttributeTypeCode.parse_stream(stream)
+            type_code = mftstructs.MFTAttributeTypeCode.parse_stream(self.stream)
             if type_code is None or type_code == 'END_OF_ATTRIBUTES':
                 break
-            type_code = type_code.lower()
             self.stream.seek(original_position)
-            attribute = MFTEntryAttribute(self.stream.getvalue()[self.stream.tell():], stream=self.stream)
+            attribute = MFTEntryAttribute(self.stream.getvalue()[original_position:])
             attribute.parse()
             if attribute.header is None:
                 continue
-            if attributes.get(type_code) is None:
-                attributes[type_code] = list()
-            attributes.get(type_code).append(Container(
-                header=attribute.header,
-                body=attribute.body
-            ))
+            attributes.append(attribute)
+            self.stream.seek(original_position + attribute.header.RecordLength)
         return self._clean_value(attributes)
     def _parse_header(self):
         '''
