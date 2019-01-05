@@ -44,11 +44,6 @@ class MFTEntryAttribute(ByteParser):
     header = StructureProperty(0, 'header')
     body = StructureProperty(1, 'body', deps=['header'])
 
-    def _postamble(self):
-        '''
-        @ByteParser._postamble
-        '''
-        pass
     def _parse_logged_utility_stream(self):
         '''
         Args:
@@ -103,7 +98,7 @@ class MFTEntryAttribute(ByteParser):
                     self.stream.seek(index_entry_position + seek_length)
             except:
                 break
-        return self._clean_value(index_root)
+        return index_root
     def _parse_data(self):
         '''
         Args:
@@ -127,7 +122,7 @@ class MFTEntryAttribute(ByteParser):
         Preconditions:
             N/A
         '''
-        return self._clean_value(mftstructs.MFTVolumeInformation.parse_stream(self.stream))
+        return mftstructs.MFTVolumeInformation.parse_stream(self.stream)
     def _parse_volume_name(self):
         '''
         Args:
@@ -165,7 +160,7 @@ class MFTEntryAttribute(ByteParser):
                     self.stream.seek(ace_position + ace.header.AceSize)
                 except:
                     break
-            return self._clean_value(acl)
+            return acl
         except:
             return None
     def _parse_security_descriptor(self):
@@ -204,7 +199,7 @@ class MFTEntryAttribute(ByteParser):
             security_descriptor.body.GroupSID = None
             security_descriptor.body.SACL = None
             security_descriptor.body.DACL = None
-        return self._clean_value(security_descriptor)
+        return security_descriptor
     def _parse_object_id(self):
         '''
         Args:
@@ -215,7 +210,7 @@ class MFTEntryAttribute(ByteParser):
         Preconditions:
             N/A
         '''
-        return self._clean_value(mftstructs.MFTObjectID.parse_stream(self.stream))
+        return mftstructs.MFTObjectID.parse_stream(self.stream)
     def _parse_file_name(self):
         '''
         Args:
@@ -231,7 +226,7 @@ class MFTEntryAttribute(ByteParser):
             if field.startswith('Raw') and field.endswith('Time'):
                 file_name[field.replace('Raw', '')] = WindowsTime(file_name[field]).parse()
         file_name.FileName = self.stream.read(file_name.FileNameLength * 2).decode('UTF16')
-        return self._clean_value(file_name)
+        return file_name
     def _parse_attribute_list(self):
         '''
         Args:
@@ -258,7 +253,7 @@ class MFTEntryAttribute(ByteParser):
                     attributes[attribute_list_entry.AttributeTypeCode.lower()] = list()
                 attributes[attribute_list_entry.AttributeTypeCode.lower()].append(attribute_list_entry)
                 self.stream.seek(AL_original_position + attribute_list_entry.RecordLength)
-        return self._clean_value(attributes)
+        return attributes
     def _parse_standard_information(self):
         '''
         Args:
@@ -273,7 +268,7 @@ class MFTEntryAttribute(ByteParser):
         for field in standard_information:
             if field.startswith('Raw') and field.endswith('Time'):
                 standard_information[field.replace('Raw', '')] = WindowsTime(standard_information[field]).parse()
-        return self._clean_value(standard_information)
+        return standard_information
     def _parse_body(self):
         '''
         Args:
