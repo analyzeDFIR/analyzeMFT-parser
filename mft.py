@@ -345,11 +345,10 @@ class MFTEntry(ByteParser):
             type_code = mftstructs.MFTAttributeTypeCode.parse_stream(self.stream)
             if type_code is None or type_code == 'END_OF_ATTRIBUTES':
                 break
-            self.stream.seek(original_position)
             attribute = MFTEntryAttribute(self.stream.getvalue()[original_position:])
             attribute.parse()
             if attribute.header is None:
-                continue
+                break
             attributes.append(attribute)
             self.stream.seek(original_position + attribute.header.RecordLength)
         return self._clean_value(attributes)
