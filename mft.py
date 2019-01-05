@@ -24,7 +24,7 @@
 import logging
 Logger = logging.getLogger(__name__)
 from os import path
-from io import BytesIO
+from io import BytesIO, SEEK_CUR
 import hashlib
 from construct.lib import Container
 
@@ -284,17 +284,13 @@ class MFTEntryAttribute(ByteParser):
         Preconditions:
             N/A
         '''
-        original_position = self.stream.tell()
-        try:
-            if self.header.FormCode != 0:
-                return None
-            parser = '_parse_%s'%self.header.TypeCode.lower()
-            if not (hasattr(self, parser) and callable(getattr(self, parser))):
-                return None
-            self.stream.seek(original_position + self.header.Form.ValueOffset)
-            return self._clean_value(getattr(self, parser)())
-        finally:
-            self.stream.seek(original_position + self.header.RecordLength)
+        if self.header.FormCode != 0:
+            return None
+        parser = '_parse_%s'%self.header.TypeCode.lower()
+        if not (hasattr(self, parser) and callable(getattr(self, parser))):
+            return None
+        self.stream.seek(self.header.Form.ValueOffset, SEEK_CUR)
+        return self._clean_value(getattr(self, parser)())
     def _parse_header(self):
         '''
         Args:
