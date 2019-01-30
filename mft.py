@@ -285,7 +285,7 @@ class MFTEntryAttribute(ByteParser):
         if not (hasattr(self, parser) and callable(getattr(self, parser))):
             return None
         self.stream.seek(self.header.Form.ValueOffset, SEEK_CUR)
-        return self._clean_value(getattr(self, parser)())
+        return getattr(self, parser)()
     def _parse_header(self):
         '''
         Args:
@@ -308,7 +308,7 @@ class MFTEntryAttribute(ByteParser):
                     header.Name = None
             else:
                 header.Name = None
-            return self._clean_value(header)
+            return header
         finally:
             self.stream.seek(original_position)
 
@@ -336,13 +336,13 @@ class MFTEntry(ByteParser):
             type_code = mftstructs.MFTAttributeTypeCode.parse_stream(self.stream)
             if type_code is None or type_code == 'END_OF_ATTRIBUTES':
                 break
-            attribute = MFTEntryAttribute(self.stream.getvalue()[original_position:])
+            attribute = MFTEntryAttribute(self.source[original_position:])
             attribute.parse()
             if attribute.header is None:
                 break
             attributes.append(attribute)
             self.stream.seek(original_position + attribute.header.RecordLength)
-        return self._clean_value(attributes)
+        return attributes
     def _parse_header(self):
         '''
         Args:
@@ -360,7 +360,7 @@ class MFTEntry(ByteParser):
             header.MultiSectorHeader.Signature = 'BAAD'
         else:
             header.MultiSectorHeader.Signature = 'CRPT'
-        return self._clean_value(header)
+        return header
 
 class MFT(FileParser):
     '''
